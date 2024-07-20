@@ -40,7 +40,7 @@ typedef void* tlsf_addr_t;
 #define SLI_COUNT_LOG2 4
 
 #define MIN_BLOCK_SIZE (1 << FLI_OFFSET)
-#define MAX_BLOCK_SIZE (1 << (FLI_COUNT + FLI_OFFSET) - 1)
+#define MAX_BLOCK_SIZE ((1 << (FLI_COUNT + FLI_OFFSET)) - 1)
 
 #define MIN_POOL_SIZE (MIN_BLOCK_SIZE + sizeof(tlsf_pool_t))
 #define MAX_POOL_SIZE (MAX_BLOCK_SIZE + sizeof(tlsf_pool_t))
