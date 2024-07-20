@@ -200,9 +200,11 @@ LOCAL_INLINE tlsf_block_header_t* locate_free_block(tlsf_size_t size)
     while (fli < FLI_COUNT)
     {
         sli = find_lsb(pool->sl_bitmap[fli] & ~((1 << sli) - 1));
-        if (is_list_free(fli, sli))
+
+        candidate_block = pool->blocks[fli][sli];
+        if (is_list_free(fli, sli) && get_size_difference(candidate_block->size, size) >= 0)
         {
-            break;
+            return candidate_block;
         }
 
         fli++;
@@ -226,8 +228,7 @@ LOCAL_INLINE tlsf_block_header_t* locate_free_block(tlsf_size_t size)
         }
     }
 
-    candidate_block = pool->blocks[fli][sli];
-    return candidate_block;
+    return NULL;
 }
 
 /* Delete the block from the corresponding list, clear its free flag and the bitmaps if necessary. */
