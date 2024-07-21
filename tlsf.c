@@ -23,6 +23,8 @@
     }
 #endif
 
+#define MEMSET memset
+
 LOCAL tlsf_pool_t *pool;
 
 /* TODO: Architecture-independent msb-lsb finding */
@@ -140,7 +142,7 @@ bool tlsf_init(tlsf_size_t pool_size)
 
     pool = GET_POOL_ADDR(pool_size);
 
-    memset(pool, 0, pool_size);
+    MEMSET(pool, 0, pool_size);
 
     pool->size = pool_size;
 
@@ -210,22 +212,15 @@ LOCAL_INLINE tlsf_block_header_t* locate_free_block(tlsf_size_t size)
         fli++;
     }
 
-    if (fli >= FLI_COUNT)
+    candidate_block = pool->blocks[initial_fli][initial_sli];
+    while (NULL != candidate_block)  // worst case
     {
-        return NULL;
-    }
-
-    if (!is_list_free(fli, sli))
-    {
-        while (NULL != candidate_block)  // worst case
+        if (get_size_difference(candidate_block->size, size) >= 0)
         {
-            if (get_size_difference(candidate_block->size, size) >= 0)
-            {
-                return candidate_block;
-            }
-
-            candidate_block = candidate_block->next_free;
+            return candidate_block;
         }
+
+        candidate_block = candidate_block->next_free;
     }
 
     return NULL;
