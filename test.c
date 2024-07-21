@@ -91,23 +91,49 @@ void test_multiple_allocations()
     tlsf_teardown();
 }
 
-void test_worst_case()
+void test_worst_case_2_blocks()
 {
     /* Worst case happens when all free blocks must be iterated in a list.
      * If no lists have a free block beyond the fli and sli of the desired size,
        blocks[initial_fli][initial_sli] must be iterated as a last resort.
     */
 
-    tlsf_init(150 + POOL_HEADER_OVERHEAD + 2 * sizeof(tlsf_block_header_t));
+    tlsf_init(152 + POOL_HEADER_OVERHEAD + 2 * sizeof(tlsf_block_header_t));
     void *ptr1 = tlsf_malloc(80);
-    void *ptr2 = tlsf_malloc(70);
+    void *ptr2 = tlsf_malloc(72);
     assert(ptr1 != NULL);
     assert(ptr2 != NULL);
     tlsf_free(ptr1);
     tlsf_free(ptr2);  // 70 bytes will be the head of the list
     void *ptr3 = tlsf_malloc(80);
     assert(ptr3 != NULL);
-    printf("Worst case test passed.\n");
+    printf("Worst case test with 2 free blocks passed.\n");
+    tlsf_teardown();
+}
+
+void test_worst_case_5_blocks()
+{
+    tlsf_init(362 + POOL_HEADER_OVERHEAD + 5 * sizeof(tlsf_block_header_t));
+    void *ptr1 = tlsf_malloc(80);
+    void *ptr2 = tlsf_malloc(70);
+    void *ptr3 = tlsf_malloc(72);
+    void *ptr4 = tlsf_malloc(70);
+    void *ptr5 = tlsf_malloc(70);
+    assert(ptr1 != NULL);
+    assert(ptr2 != NULL);
+    assert(ptr3 != NULL);
+    assert(ptr4 != NULL);
+    assert(ptr5 != NULL);
+    tlsf_free(ptr1);
+    tlsf_free(ptr3);
+    tlsf_free(ptr5);
+    void *ptr6 = tlsf_malloc(80);
+    void *ptr7 = tlsf_malloc(72);
+    void *ptr8 = tlsf_malloc(70);
+    assert(ptr6 != NULL);
+    assert(ptr7 != NULL);
+    assert(ptr8 != NULL);
+    printf("Worst case test with 5 free blocks passed.\n");
     tlsf_teardown();
 }
 
@@ -163,7 +189,8 @@ int main()
     test_full_pool_chunked();
     test_allocation_and_deallocation();
     test_multiple_allocations();
-    test_worst_case();
+    test_worst_case_2_blocks();
+    test_worst_case_5_blocks();
     test_merging();
     test_minimum_allocation();
     test_free_null_pointer();
